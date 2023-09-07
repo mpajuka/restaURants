@@ -9,3 +9,5 @@ Sovelluksessa näkyy tietyn alueen ravintolat, joista voi etsiä tietoa ja lukea
 - Käyttäjä näkee myös listan, jossa ravintolat on järjestetty parhaimmasta huonoimpaan arvioiden mukaisesti.
 - Ylläpitäjä voi tarvittaessa poistaa käyttäjän antaman arvion.
 - Ylläpitäjä voi luoda ryhmiä, joihin ravintoloita voi luokitella. Ravintola voi kuulua yhteen tai useampaan ryhmään.
+
+Sovelluksen toiminta olisi siis pitkälti esimerkkikuvauksen mukainen.
