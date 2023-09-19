@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kirjautuminen</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+<body>
+<div class="container" style="padding: 20px">
+   <form action="/loginresult" method="POST">
+      <div class="form-group">
+        <label for="exampleInputUsername">Käyttäjätunnus</label>
+        <input class="form-control" id="username" name="username" placeholder="Syötä käyttäjätunnuksesi">
+      </div>
+      <div class="form-group">
+        <label for="exampleInputPassword1">Salasana</label>
+        <input type="password" class="form-control" id="password" name="password" placeholder="Syötä salasanasi">
+      </div>
+        <button type="submit" class="btn btn-primary">Kirjaudu</button>
+    </form>
+    <form action="/newaccount" method="GET">
+       <div>
+           <hr>
+           <b>Ei vielä tunnusta?</b>
+           <br>
+           <button class="btn btn-secondary">Luo uusi käyttäjä</button>
+       </div>
+    </form>
+</div>
+
+</body>
+</html>

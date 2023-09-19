@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title> {{ restaurantName }}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <style>
+        th {
+            text-align: right;
+            padding-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" style="padding-top: 20px; padding-bottom: 20px">
+    <a href="/" class="btn btn-outline-primary">Takaisin valikkoon</a>
+        <hr>
+        <div style="display: flex; justify-content: space-between; align-items: center">
+            <h1>{{ restaurantName }}</h1>
+            {% if meanScore %}
+            <h4>Keskimääräinen arvosana: {{ meanScore }}</h4>
+            {% endif %}
+        </div>
+
+        {% if reviews[0].description %}
+            <p style="margin-top: 10px">{{ reviews[0].description }}</p>
+        {% else %}
+            {% if session.role == 'admin' %}
+                <h5>Lisää puuttuva kuvaus!</h5>
+                <form action="/adddescription/{{ restaurantName }}" method="POST">
+                    <textarea class="form-control" id="description" name="description" placeholder="Kuvaus ravintolasta..."></textarea>
+                    <button type="submit" style="margin-top: 10px;" class="btn btn-success">Lähetä kuvaus</button>
+                </form>
+            {% endif %}
+        {% endif %}
+        {% if openingHours %}
+            <hr>
+            <h5>Aukioloajat</h5>
+            <table>
+            {% for hour in openingHours %}
+                {% if hour.openday == 1 %}
+                    <tr>
+                        <th>Maanantai</th>
+                        {% if hour.openhourstart == "" and hour.openhourend == "" %}
+                            <td>suljettu</td>
+                        {% else %}
+                             <td>{{ hour.openhourstart }} – {{ hour.openhourend }}</td>
+                        {% endif %}
+                    </tr>
+                {% endif %}
+                {% if hour.openday == 2 %}
+                    <tr><th>Tiistai</th>
+                        {% if hour.openhourstart == "" and hour.openhourend == "" %}
+                            <td>suljettu</td>
+                        {% else %}
+                             <td>{{ hour.openhourstart }} – {{ hour.openhourend }}</td>
+                        {% endif %}</tr>
+                {% endif %}
+                {% if hour.openday == 3 %}
+                    <tr><th>Keskiviikko</th>
+                        {% if hour.openhourstart == "" and hour.openhourend == "" %}
+                            <td>suljettu</td>
+                        {% else %}
+                             <td>{{ hour.openhourstart }} – {{ hour.openhourend }}</td>
+                        {% endif %}</tr>
+                {% endif %}
+                {% if hour.openday == 4 %}
+                    <tr><th>Torstai</th>
+                        {% if hour.openhourstart == "" and hour.openhourend == "" %}
+                            <td>suljettu</td>
+                        {% else %}
+                             <td>{{ hour.openhourstart }} – {{ hour.openhourend }}</td>
+                        {% endif %}</tr>
+                {% endif %}
+                {% if hour.openday == 5 %}
+                    <tr><th>Perjantai</th>
+                        {% if hour.openhourstart == "" and hour.openhourend == "" %}
+                            <td>suljettu</td>
+                        {% else %}
+                             <td>{{ hour.openhourstart }} – {{ hour.openhourend }}</td>
+                        {% endif %}</tr>
+                {% endif %}
+                {% if hour.openday == 6 %}
+                    <tr>
+                        <th>Lauantai</th>
+                        {% if hour.openhourstart == "" and hour.openhourend == "" %}
+                            <td>suljettu</td>
+                        {% else %}
+                             <td>{{ hour.openhourstart }} – {{ hour.openhourend }}</td>
+                        {% endif %}
+
+                    </tr>
+                {% endif %}
+                {% if hour.openday == 7 %}
+                    <tr>
+                        <th>Sunnuntai</th>
+                        {% if hour.openhourstart == "" and hour.openhourend == "" %}
+                            <td>suljettu</td>
+                        {% else %}
+                             <td>{{ hour.openhourstart }} – {{ hour.openhourend }}</td>
+                        {% endif %}
+                    </tr>
+                {% endif %}
+            {% endfor %}
+            </table>
+        {% else %}
+            {% if session.role == 'admin' %}
+                <hr>
+                <h5 style="padding-top: 10px">Lisää puuttuvat aukioloajat</h5>
+                <form action="/addhours/{{ restaurantName }}" method="POST">
+                    <div>
+                        <div>
+                            <label for="check1">Maanantai</label>
+                            <input type="time" name="timeStart1" id="start1">
+                            <label for="start1">Alkaen</label>
+                            <input type="time" name="timeEnd1" id="end1">
+                            <label for="end1">Päättyen</label>
+                        </div>
+                        <div>
+                            <label>Tiistai</label>
+                            <input type="time" name="timeStart2" id="start2">
+                            <label for="start2">Alkaen</label>
+                            <input type="time" name="timeEnd2" id="end2">
+                            <label for="end2">Päättyen</label>
+                        </div>
+                        <div>
+                            <label for="check3">Keskiviikko</label>
+                            <input type="time" name="timeStart3" id="start3">
+                            <label for="start3">Alkaen</label>
+                            <input type="time" name="timeEnd3" id="end3">
+                            <label for="end3">Päättyen</label>
+                        </div>
+                        <div>
+                            <label for="check4">Torstai</label>
+                            <input type="time" name="timeStart4" id="start4">
+                            <label for="start4">Alkaen</label>
+                            <input type="time" name="timeEnd4" id="end4">
+                            <label for="end4">Päättyen</label>
+                        </div>
+                        <div>
+                            <label for="check5">Perjantai</label>
+                            <input type="time" name="timeStart5" id="start5">
+                            <label for="start5">Alkaen</label>
+                            <input type="time" name="timeEnd5" id="end5">
+                            <label for="end5">Päättyen</label>
+                        </div>
+                        <div>
+                            <label for="check6">Lauantai</label>
+                            <input type="time" name="timeStart6" id="start6">
+                            <label for="start6">Alkaen</label>
+                            <input type="time" name="timeEnd6" id="end6">
+                            <label for="end6">Päättyen</label>
+                        </div>
+                        <div>
+                            <label for="check7">Sunnuntai</label>
+                            <input type="time" name="timeStart7" id="start7">
+                            <label for="start7">Alkaen</label>
+                            <input type="time" name="timeEnd7" id="end7">
+                            <label for="end7">Päättyen</label>
+                        </div>
+                        <button style="margin-top: 10px;" type="submit" class="btn btn-secondary">Lisää aukioloajat</button>
+                    </div>
+                </form>
+            {% endif %}
+        {% endif %}
+        <hr>
+        {% if session.username %}
+        <form action="/addreview/{{ restaurantName }}" method="POST">
+            <h3>Lisää arvio</h3>
+            <textarea class="form-control" id="textReview" name="textReview" placeholder="Arviosi ravintolasta..."></textarea>
+            <div style="margin-top: 15px">
+                <h6>Tähtiarvosana</h6>
+                <input type="radio" id="1" name="rating" value=1>
+                <label for="1">1</label>
+                <input type="radio" id="2" name="rating" value=2>
+                <label for="2">2</label>
+                <input type="radio" id="3" name="rating" value=3>
+                <label for="3">3</label>
+                <input type="radio" id="4" name="rating" value=4>
+                <label for="4">4</label>
+                <input type="radio" id="5" name="rating" value=5>
+                <label for="5">5</label>
+            </div>
+            <hr>
+            <input type="hidden" name="restaurantName">
+            <button style="margin-top: 10px; margin-bottom: 10px" class="btn btn-primary">Lähetä</button>
+        </form>
+            {% else %}
+            <h5>Kirjaudu sisään jättääksesi arvion: </h5>
+            <a style="margin-top: 10px; margin-bottom: 10px" class="btn btn-primary" href="{{  url_for('login') }}">Kirjautumiseen</a>
+        {% endif %}
+        <hr>
+        <h4>Arviot</h4>
+        <hr>
+        {% for review in reviews %}
+            {% if review.starreview != None %}
+                <h5>Tähtiarvosana: {{ review.starreview }}</h5>
+                <h5>Arvio: </h5> {{ review.textreview }}
+                <hr>
+            {% else %}
+                <p>Ei vielä yhtään arviota</p>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ravintolat</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<body>
+        <div class="container" style="padding-top: 20px; padding-bottom: 20px">
+            <div style="display: flex; justify-content: space-between; align-items: center">
+                <h1><i class="bi bi-pin-map-fill"></i> Ravintolat</h1>
+                <div>
+                {%  if session.username %}
+                    <h5>Tervetuloa takaisin {{ session.username }}!
+                        <br>
+                        <small style="float: right; margin-top: 5px"><a href="/logout">Kirjaudu ulos</a></small>
+                    </h5>
+                {% else %}
+                    <p>
+                        <a style="margin-top: 10px" class="btn btn-primary" href="{{  url_for('login') }}">Kirjautumiseen</a>
+                    </p>
+                {% endif %}
+                </div>
+            </div>
+
+            <hr>
+            <h4>Ravintolat kartalla</h4>
+
+            <div style="padding-top: 20px; padding-bottom: 20px">
+                <iframe width="425" height="350" src="https://www.openstreetmap.org/export/embed.html?bbox=24.721641540527344%2C60.09378164744673%2C25.075263977050785%2C60.29753108044368&amp;layer=mapnik"></iframe>
+            </div>
+            <h4>Ravintolalista</h4>
+            <hr>
+            {%  for restaurant in restaurants %}
+                <div style="display: flex; align-items: center; flex-direction: row; justify-content: space-between">
+                    <a href="/restaurants/{{ restaurant.name }}">{{ restaurant.name }}</a>
+                    <input type="hidden" id="restaurantName" name="restaurantName">
+                </div>
+                <hr>
+            {% endfor %}
+            {% if session.role == "admin" %}
+                <div style="padding-top: 20px; padding-bottom: 20px">
+                    <h4>Jokin ravintola puuttuu listaltamme?</h4>
+                    <h5>Voit lisätä sen palveluun alta!</h5>
+                    <hr>
+                    <form action="/addrestaurant" method="POST">
+                      <div class="form-group">
+                        <label for="restaurantName">Ravintolan nimi</label>
+                        <input class="form-control" id="restaurantName" name="restaurantName" placeholder="Syötä ravintolan nimi">
+                      </div>
+                        <button type="submit" class="btn btn-primary">Lisää</button>
+                    </form>
+                </div>
+            {% endif %}
+        </div>
+</body>
+</html>
