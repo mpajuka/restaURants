@@ -27,13 +27,15 @@ def loginresult():
     user = result.fetchone()
     if not user:
         # TODO: invalid username
-        return redirect("/")
+        return redirect("/login")
     else:
         hash_value = user.password
         if check_password_hash(hash_value, password):
             # TODO: correct username and password
             if user.role == "admin":
                 session["role"] = "admin"
+            else:
+                session["role"] = "basic"
             session["username"] = username
             return redirect("/")
         else:
@@ -49,7 +51,7 @@ def newaccountresult():
     sql = text("INSERT INTO users (username, password, role) VALUES (:username, :password, 'basic')")
     db.session.execute(sql, {"username":newUsername, "password":hash_value})
     db.session.commit()
-    return redirect("/")
+    return redirect("/login")
 
 
 @app.route("/newaccount")
@@ -64,6 +66,41 @@ def addrestaurant():
     db.session.execute(sql, {"restaurantName": newRestaurantName})
     db.session.commit()
     return redirect("/")
+
+
+@app.route("/removerestaurant/<restaurantName>", methods=["POST"])
+def removerestaurant(restaurantName):
+    idQuery = text("SELECT id FROM restaurants WHERE name = :restaurantName")
+    restaurantQuery = db.session.execute(idQuery,
+                                    {"restaurantName": restaurantName})
+    restaurantExists = restaurantQuery.fetchone()
+
+    if restaurantExists:
+        restaurantId = restaurantExists[0]
+        reviewsQuery = text("SELECT * FROM reviews WHERE restaurantid = :restaurantId")
+        reviews = db.session.execute(reviewsQuery, {"restaurantId": restaurantId})
+        reviewsExist = reviews.fetchone()
+
+        sqlHours = text(
+            "DELETE FROM opening_hours WHERE restaurantid = :restaurantId")
+        sqlReviews = text(
+            "DELETE FROM reviews WHERE restaurantid = :restaurantId")
+        sqlRestaurants = text(
+            "DELETE FROM restaurants WHERE id = :restaurantId")
+
+        if reviewsExist:
+            db.session.execute(sqlHours, {"restaurantId": restaurantId})
+            db.session.execute(sqlReviews, {"restaurantId": restaurantId})
+            db.session.execute(sqlRestaurants, {"restaurantId": restaurantId})
+        else:
+            db.session.execute(sqlHours, {"restaurantId": restaurantId})
+            db.session.execute(sqlRestaurants, {"restaurantId": restaurantId})
+
+        db.session.commit()
+        return redirect("/")
+    else:
+        return redirect(f"/restaurants/{restaurantName}")
+
 
 
 @app.route("/restaurants/<restaurantName>", methods=["GET"])
@@ -102,9 +139,7 @@ def restaurant(restaurantName):
                                    openingHours=hoursData,
                                    reviews=data)
     else:
-        return render_template("restaurant.html",
-                               restaurantName=restaurantName,
-                               reviews=reviews)
+        return redirect("/")
 
 
 @app.route("/addreview/<restaurantName>", methods=["POST"])
@@ -140,6 +175,15 @@ def adddescription(restaurantName):
     db.session.commit()
     return redirect(f'/restaurants/{restaurantName}')
 
+
+@app.route("/removedescription/<restaurantName>", methods=["POST"])
+def removedescription(restaurantName):
+    sql = text("UPDATE restaurants "
+               "SET description = ''"
+                "WHERE name = :restaurantName; ")
+    db.session.execute(sql, {"restaurantName": restaurantName})
+    db.session.commit()
+    return redirect(f"/restaurants/{restaurantName}")
 
 @app.route("/addhours/<restaurantName>", methods=["POST"])
 def addhours(restaurantName):
@@ -221,9 +265,45 @@ def addhours(restaurantName):
     else:
         return redirect(f"/restaurants/{restaurantName}")
 
+@app.route("/removehours/<restaurantName>", methods=["POST"])
+def removehours(restaurantName):
+    idQuery = text("SELECT id FROM restaurants WHERE name = :restaurantName")
+    restaurant = db.session.execute(idQuery,
+                                    {"restaurantName": restaurantName})
+    result = restaurant.fetchone()
+
+    if result:
+        restaurantId = result[0]
+        sql = text("DELETE FROM opening_hours WHERE restaurantid = :restaurantId")
+        db.session.execute(sql, {"restaurantId": restaurantId})
+        db.session.commit()
+        return redirect(f"/restaurants/{restaurantName}")
+    else:
+        return redirect(f"/restaurants/{restaurantName}")
 
 
+"""
+Toteutus vielä kesken
+@app.route("/addcoords/<restaurantName>", methods=["POST"])
+def addcoords(restaurantName):
+    idQuery = text("SELECT id FROM restaurants WHERE name = :restaurantName")
+    restaurant = db.session.execute(idQuery,
+                                    {"restaurantName": restaurantName})
+    result = restaurant.fetchone()
 
+    lat = request.form["latitude"]
+    lon = request.form["longitude"]
+    if result:
+        restaurantId = result[0]
+        sql = text("UPDATE restaurants "
+                   "SET coords = (:lat, :lon) "
+                   "WHERE id = :restaurantId")
+        db.session.execute(sql, {"lat": lat, "lon": lon, "restaurantId": restaurantId})
+        db.session.commit()
+        return redirect(f"/restaurants/{restaurantName}")
+    else:
+        return redirect(f"/restaurants/{restaurantName}")
+"""
 
 @app.route("/logout")
 def logout():

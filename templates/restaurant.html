@@ -18,12 +18,40 @@
         <div style="display: flex; justify-content: space-between; align-items: center">
             <h1>{{ restaurantName }}</h1>
             {% if meanScore %}
-            <h4>Keskimääräinen arvosana: {{ meanScore }}</h4>
+                <h4>Keskimääräinen arvosana: {{ meanScore }}</h4>
             {% endif %}
-        </div>
 
+        </div>
+        {% if session.role == 'admin' %}
+            <form action="/removerestaurant/{{ restaurantName }}" method="POST"
+                  onsubmit="return confirm('Oletko varma että tahdot poistaa ravintolan pysyvästi?');">
+                <button type="submit" class="btn btn-danger">Poista ravintola</button>
+            </form>
+            <hr>
+            <!--
+            {% if not reviews[0].coords %}
+                <form action="/addcoords/{{ restaurantName }}" method="POST">
+                    <div>
+                        <input name="latitude" id="latitude">
+                        <label for="latitude">Latitudi</label>
+                    </div>
+                    <div>
+                        <input name="longitude" id="longitude">
+                        <label for="longitude">Longitudi</label>
+                    </div>
+                    <button style="margin-top: 10px;" type="submit" class="btn btn-warning">Lisää sijainti</button>
+                </form>
+                <hr>
+            {% endif %}
+            -->
+        {% endif %}
         {% if reviews[0].description %}
             <p style="margin-top: 10px">{{ reviews[0].description }}</p>
+            {% if session.role == 'admin' %}
+                <form action="/removedescription/{{ restaurantName }}" method="POST">
+                    <button type="submit" class="btn btn-warning">Luo uusi kuvaus</button>
+                </form>
+            {% endif %}
         {% else %}
             {% if session.role == 'admin' %}
                 <h5>Lisää puuttuva kuvaus!</h5>
@@ -103,6 +131,11 @@
                 {% endif %}
             {% endfor %}
             </table>
+            {% if session.role == 'admin' %}
+                <form action="/removehours/{{ restaurantName }}" method="POST">
+                    <button type="submit" class="btn btn-warning">Lisää uudet aukioloajat</button>
+                </form>
+            {% endif %}
         {% else %}
             {% if session.role == 'admin' %}
                 <hr>
@@ -158,38 +191,40 @@
                             <input type="time" name="timeEnd7" id="end7">
                             <label for="end7">Päättyen</label>
                         </div>
-                        <button style="margin-top: 10px;" type="submit" class="btn btn-secondary">Lisää aukioloajat</button>
+                        <button style="margin-top: 10px;" type="submit" class="btn btn-success">Lisää aukioloajat</button>
                     </div>
                 </form>
             {% endif %}
         {% endif %}
         <hr>
-        {% if session.username %}
-        <form action="/addreview/{{ restaurantName }}" method="POST">
-            <h3>Lisää arvio</h3>
-            <textarea class="form-control" id="textReview" name="textReview" placeholder="Arviosi ravintolasta..."></textarea>
-            <div style="margin-top: 15px">
-                <h6>Tähtiarvosana</h6>
-                <input type="radio" id="1" name="rating" value=1>
-                <label for="1">1</label>
-                <input type="radio" id="2" name="rating" value=2>
-                <label for="2">2</label>
-                <input type="radio" id="3" name="rating" value=3>
-                <label for="3">3</label>
-                <input type="radio" id="4" name="rating" value=4>
-                <label for="4">4</label>
-                <input type="radio" id="5" name="rating" value=5>
-                <label for="5">5</label>
-            </div>
+        {% if session.role == 'basic' %}
+            {% if session.username %}
+            <form action="/addreview/{{ restaurantName }}" method="POST">
+                <h3>Lisää arvio</h3>
+                <textarea class="form-control" id="textReview" name="textReview" placeholder="Arviosi ravintolasta..."></textarea>
+                <div style="margin-top: 15px">
+                    <h6>Tähtiarvosana</h6>
+                    <input type="radio" id="1" name="rating" value=1>
+                    <label for="1">1</label>
+                    <input type="radio" id="2" name="rating" value=2>
+                    <label for="2">2</label>
+                    <input type="radio" id="3" name="rating" value=3>
+                    <label for="3">3</label>
+                    <input type="radio" id="4" name="rating" value=4>
+                    <label for="4">4</label>
+                    <input type="radio" id="5" name="rating" value=5>
+                    <label for="5">5</label>
+                </div>
+                <hr>
+                <input type="hidden" name="restaurantName">
+                <button style="margin-top: 10px; margin-bottom: 10px" class="btn btn-primary">Lähetä</button>
+            </form>
+                {% else %}
+                <h5>Kirjaudu sisään jättääksesi arvion: </h5>
+                <a style="margin-top: 10px; margin-bottom: 10px" class="btn btn-primary" href="{{  url_for('login') }}">Kirjautumiseen</a>
+            {% endif %}
             <hr>
-            <input type="hidden" name="restaurantName">
-            <button style="margin-top: 10px; margin-bottom: 10px" class="btn btn-primary">Lähetä</button>
-        </form>
-            {% else %}
-            <h5>Kirjaudu sisään jättääksesi arvion: </h5>
-            <a style="margin-top: 10px; margin-bottom: 10px" class="btn btn-primary" href="{{  url_for('login') }}">Kirjautumiseen</a>
         {% endif %}
-        <hr>
         <h4>Arviot</h4>
         <hr>
         {% for review in reviews %}

@@ -1,9 +1,18 @@
 /* Tietokannan alustaminen */
 
+/*
+# Toteutus kesken #
+CREATE TYPE coord_pair AS (
+    lat TEXT,
+    lon TEXT
+);
+ */
+
 CREATE TABLE restaurants(
     id SERIAL PRIMARY KEY,
     name TEXT,
-    description TEXT
+    description TEXT/*,
+    coords coord_pair */
 );
 
 CREATE TABLE reviews(
