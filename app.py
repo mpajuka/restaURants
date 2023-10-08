@@ -37,6 +37,7 @@ def loginresult():
             else:
                 session["role"] = "basic"
             session["username"] = username
+            session["id"] = user.id
             return redirect("/")
         else:
             # TODO: invalid password
@@ -105,6 +106,7 @@ def removerestaurant(restaurantName):
 
 @app.route("/restaurants/<restaurantName>", methods=["GET"])
 def restaurant(restaurantName):
+
     sql = text("SELECT reviews.starReview, reviews.textReview, restaurants.name,"
                " restaurants.description "
                "FROM reviews "
@@ -112,6 +114,18 @@ def restaurant(restaurantName):
                "WHERE restaurants.name = :restaurantName;")
     reviews = db.session.execute(sql, {"restaurantName": restaurantName})
     data = reviews.fetchall()
+
+    session["reviewed"] = "false"
+    userId = session.get("id")
+    reviewsSql = text("SELECT reviews.userId, restaurants.name "
+                      "FROM reviews "
+                      "RIGHT JOIN restaurants ON reviews.restaurantId = restaurants.id "
+                      "WHERE userId = :userId AND restaurants.name = :restaurantName")
+    userIdInReviews = db.session.execute(reviewsSql, {"userId": userId,
+                                                      "restaurantName": restaurantName})
+    alreadyReviewed = userIdInReviews.fetchall()
+    if alreadyReviewed:
+        session["reviewed"] = "true"
 
     if data:
         opening_hours_sql = text("SELECT openDay, openHourStart, openHourEnd "
@@ -152,10 +166,12 @@ def addreview(restaurantName):
 
     if result:
         restaurantId = result[0]
-        sql = text("INSERT INTO reviews (restaurantId, starReview, textReview) "
-                   "VALUES (:restaurantId, :starReview, :textReview)")
+        userId = session.get("id")
+        sql = text("INSERT INTO reviews (restaurantId, userId, starReview, textReview) "
+                   "VALUES (:restaurantId, :userId, :starReview, :textReview)")
 
         db.session.execute(sql, {"restaurantId": restaurantId,
+                                 "userId": userId,
                                  "starReview": starReview,
                                  "textReview": textReview})
         db.session.commit()
@@ -317,8 +333,14 @@ def logout():
 
 @app.route("/")
 def index():
-    result = db.session.execute(text("SELECT * FROM restaurants ORDER BY name ASC;"))
-    restaurants = result.fetchall()
-    return render_template("restaurants.html", count=len(restaurants),
-                           restaurants=restaurants)
+    sql = text(
+        "SELECT restaurants.name, ROUND(AVG(starreview), 1) as average_rating "
+        "FROM reviews "
+        "RIGHT JOIN restaurants ON reviews.restaurantid = restaurants.id "
+        "GROUP BY restaurants.name "
+        "ORDER BY average_rating DESC, restaurants.name ASC")
+    sortedRestaurants = db.session.execute(sql)
+    restaurantsData = sortedRestaurants.fetchall()
+    return render_template("restaurants.html",
+                           restaurants=restaurantsData)
 

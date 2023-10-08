@@ -197,31 +197,35 @@
             {% endif %}
         {% endif %}
         <hr>
-        {% if session.role == 'basic' %}
-            {% if session.username %}
-            <form action="/addreview/{{ restaurantName }}" method="POST">
-                <h3>Lisää arvio</h3>
-                <textarea class="form-control" id="textReview" name="textReview" placeholder="Arviosi ravintolasta..."></textarea>
-                <div style="margin-top: 15px">
-                    <h6>Tähtiarvosana</h6>
-                    <input type="radio" id="1" name="rating" value=1>
-                    <label for="1">1</label>
-                    <input type="radio" id="2" name="rating" value=2>
-                    <label for="2">2</label>
-                    <input type="radio" id="3" name="rating" value=3>
-                    <label for="3">3</label>
-                    <input type="radio" id="4" name="rating" value=4>
-                    <label for="4">4</label>
-                    <input type="radio" id="5" name="rating" value=5>
-                    <label for="5">5</label>
-                </div>
-                <hr>
-                <input type="hidden" name="restaurantName">
-                <button style="margin-top: 10px; margin-bottom: 10px" class="btn btn-primary">Lähetä</button>
-            </form>
-                {% else %}
-                <h5>Kirjaudu sisään jättääksesi arvion: </h5>
-                <a style="margin-top: 10px; margin-bottom: 10px" class="btn btn-primary" href="{{  url_for('login') }}">Kirjautumiseen</a>
+        {% if not session.username %}
+            <h5>Kirjaudu sisään jättääksesi arvion: </h5>
+            <a style="margin-top: 10px; margin-bottom: 10px" class="btn btn-primary" href="{{  url_for('login') }}">Kirjautumiseen</a>
+            <hr>
+        {% endif %}
+        {% if session.role == 'basic' and session.username %}
+            {% if session.reviewed == 'true' %}
+                <p>Voit jättää vain yhden arvion</p>
+            {% else %}
+                <form action="/addreview/{{ restaurantName }}" method="POST">
+                    <h3>Lisää arvio</h3>
+                    <textarea class="form-control" id="textReview" name="textReview" placeholder="Arviosi ravintolasta..."></textarea>
+                    <div style="margin-top: 15px">
+                        <h6>Tähtiarvosana</h6>
+                        <input type="radio" id="1" name="rating" value=1>
+                        <label for="1">1</label>
+                        <input type="radio" id="2" name="rating" value=2>
+                        <label for="2">2</label>
+                        <input type="radio" id="3" name="rating" value=3 checked="checked">
+                        <label for="3">3</label>
+                        <input type="radio" id="4" name="rating" value=4>
+                        <label for="4">4</label>
+                        <input type="radio" id="5" name="rating" value=5>
+                        <label for="5">5</label>
+                    </div>
+                    <hr>
+                    <input type="hidden" name="restaurantName">
+                    <button style="margin-top: 10px; margin-bottom: 10px" class="btn btn-primary">Lähetä</button>
+                </form>
             {% endif %}
             <hr>
         {% endif %}

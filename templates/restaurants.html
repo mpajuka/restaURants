@@ -56,13 +56,20 @@
                   </script>
             </div>
             -->
+            <div style="display: flex; align-items: center; flex-direction: row; justify-content: space-between">
+                <h5>Ravintolan nimi</h5>
+                <h5>Keskimääräinen arvosana</h5>
+            </div>
+            <hr>
             {%  for restaurant in restaurants %}
                 <div style="display: flex; align-items: center; flex-direction: row; justify-content: space-between">
                     <a href="/restaurants/{{ restaurant.name }}">{{ restaurant.name }}</a>
                     <input type="hidden" id="restaurantName" name="restaurantName">
+                    <p><b>{{ restaurant.average_rating }}</b></p>
                 </div>
                 <hr>
             {% endfor %}
+
             {% if session.role == "admin" %}
                 <div style="padding-top: 20px; padding-bottom: 20px">
                     <h4>Jokin ravintola puuttuu listaltamme?</h4>

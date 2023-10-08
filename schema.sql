@@ -18,11 +18,17 @@ CREATE TABLE restaurants(
 CREATE TABLE reviews(
     reviewId SERIAL PRIMARY KEY,
     restaurantId INT,
+    userId INT,
     starReview INT,
     textReview TEXT,
     CONSTRAINT fk_restaurantId
         FOREIGN KEY(restaurantId)
-            REFERENCES restaurants(id)
+            REFERENCES restaurants(id),
+
+    CONSTRAINT fk_userId
+        FOREIGN KEY(userId)
+            REFERENCES users(id)
+
 );
 
 CREATE TYPE usertype AS ENUM('basic', 'admin');
