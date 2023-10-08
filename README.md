@@ -46,3 +46,6 @@ Tämän jälkeen kun olet uudelleenkirjautunut, pystyt lisäämään ravintoloit
 palveluun. Pääkäyttäjä pystyy luomaan ravintolan, määrittelemään sille 
 kuvauksen, aukioloajat ja poistamaan ravintolan. Peruskäyttäjä pystyy taas
 kirjoittamaan näihin ravintoloihin arvioita, kommentein ja tähtiarviolla.
+Ravintolat esitetään päävalikossa keskimääräisen arvosanan perusteella.
+
+Kartta- ja hakutoiminnallisuus, sekä ryhmäluokittelu ovat vielä toistaiseksi työn alla.
