@@ -25,6 +25,7 @@
         {% if session.role == 'admin' %}
             <form action="/removerestaurant/{{ restaurantName }}" method="POST"
                   onsubmit="return confirm('Oletko varma että tahdot poistaa ravintolan pysyvästi?');">
+                <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
                 <button type="submit" class="btn btn-danger">Poista ravintola</button>
             </form>
             <hr>
@@ -49,6 +50,7 @@
             <p style="margin-top: 10px">{{ reviews[0].description }}</p>
             {% if session.role == 'admin' %}
                 <form action="/removedescription/{{ restaurantName }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
                     <button type="submit" class="btn btn-warning">Luo uusi kuvaus</button>
                 </form>
             {% endif %}
@@ -57,6 +59,7 @@
                 <h5>Lisää puuttuva kuvaus!</h5>
                 <form action="/adddescription/{{ restaurantName }}" method="POST">
                     <textarea class="form-control" id="description" name="description" placeholder="Kuvaus ravintolasta..."></textarea>
+                    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
                     <button type="submit" style="margin-top: 10px;" class="btn btn-success">Lähetä kuvaus</button>
                 </form>
             {% endif %}
@@ -133,6 +136,7 @@
             </table>
             {% if session.role == 'admin' %}
                 <form action="/removehours/{{ restaurantName }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
                     <button type="submit" class="btn btn-warning">Lisää uudet aukioloajat</button>
                 </form>
             {% endif %}
@@ -144,37 +148,47 @@
                     <div>
                         <div>
                             <label for="check1">Maanantai</label>
-                            <input type="time" name="timeStart1" id="start1">
+                            <input type="time" name="timeStart1" id="start1"
+                                value="08:00">
                             <label for="start1">Alkaen</label>
-                            <input type="time" name="timeEnd1" id="end1">
+                            <input type="time" name="timeEnd1" id="end1"
+                                value="16:00">
                             <label for="end1">Päättyen</label>
                         </div>
                         <div>
                             <label>Tiistai</label>
-                            <input type="time" name="timeStart2" id="start2">
+                            <input type="time" name="timeStart2" id="start2"
+                                value="08:00">
                             <label for="start2">Alkaen</label>
-                            <input type="time" name="timeEnd2" id="end2">
+                            <input type="time" name="timeEnd2" id="end2"
+                                value="16:00">
                             <label for="end2">Päättyen</label>
                         </div>
                         <div>
                             <label for="check3">Keskiviikko</label>
-                            <input type="time" name="timeStart3" id="start3">
+                            <input type="time" name="timeStart3" id="start3"
+                                value="08:00">
                             <label for="start3">Alkaen</label>
-                            <input type="time" name="timeEnd3" id="end3">
+                            <input type="time" name="timeEnd3" id="end3"
+                                value="16:00">
                             <label for="end3">Päättyen</label>
                         </div>
                         <div>
                             <label for="check4">Torstai</label>
-                            <input type="time" name="timeStart4" id="start4">
+                            <input type="time" name="timeStart4" id="start4"
+                                value="08:00">
                             <label for="start4">Alkaen</label>
-                            <input type="time" name="timeEnd4" id="end4">
+                            <input type="time" name="timeEnd4" id="end4"
+                                value="16:00">
                             <label for="end4">Päättyen</label>
                         </div>
                         <div>
                             <label for="check5">Perjantai</label>
-                            <input type="time" name="timeStart5" id="start5">
+                            <input type="time" name="timeStart5" id="start5"
+                                value="08:00">
                             <label for="start5">Alkaen</label>
-                            <input type="time" name="timeEnd5" id="end5">
+                            <input type="time" name="timeEnd5" id="end5"
+                                value="16:00">
                             <label for="end5">Päättyen</label>
                         </div>
                         <div>
@@ -191,6 +205,7 @@
                             <input type="time" name="timeEnd7" id="end7">
                             <label for="end7">Päättyen</label>
                         </div>
+                        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
                         <button style="margin-top: 10px;" type="submit" class="btn btn-success">Lisää aukioloajat</button>
                     </div>
                 </form>
@@ -224,6 +239,7 @@
                     </div>
                     <hr>
                     <input type="hidden" name="restaurantName">
+                    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
                     <button style="margin-top: 10px; margin-bottom: 10px" class="btn btn-primary">Lähetä</button>
                 </form>
             {% endif %}
@@ -235,6 +251,11 @@
             {% if review.starreview != None %}
                 <h5>Tähtiarvosana: {{ review.starreview }}</h5>
                 <h5>Arvio: </h5> {{ review.textreview }}
+                {% if review.userid == session["id"] or session["role"] == 'admin' %}
+                    <form action="/removereview/{{ restaurantName }}/{{ review.reviewid }}" method="POST">
+                        <button style="margin-top: 10px; margin-bottom: 10px" class="btn btn-danger">Poista arvio</button>
+                    </form>
+                {% endif %}
                 <hr>
             {% else %}
                 <p>Ei vielä yhtään arviota</p>

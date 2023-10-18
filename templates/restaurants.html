@@ -13,6 +13,10 @@
         <div class="container" style="padding-top: 20px; padding-bottom: 20px">
             <div style="display: flex; justify-content: space-between; align-items: center">
                 <h1><i class="bi bi-pin-map-fill"></i> Ravintolat</h1>
+                <form class="form-inline" action="/searchrestaurant" method="POST">
+                    <input placeholder="Hae kuvauksella" class="form-control mr-sm-2" name="word" type="search">
+                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Hae</button>
+                </form>
                 <div>
                 {%  if session.username %}
                     <h5>Tervetuloa takaisin {{ session.username }}!
@@ -65,7 +69,9 @@
                 <div style="display: flex; align-items: center; flex-direction: row; justify-content: space-between">
                     <a href="/restaurants/{{ restaurant.name }}">{{ restaurant.name }}</a>
                     <input type="hidden" id="restaurantName" name="restaurantName">
+                    {% if restaurant.average_rating %}
                     <p><b>{{ restaurant.average_rating }}</b></p>
+                    {% endif %}
                 </div>
                 <hr>
             {% endfor %}
@@ -80,6 +86,7 @@
                         <label for="restaurantName">Ravintolan nimi</label>
                         <input class="form-control" id="restaurantName" name="restaurantName" placeholder="Syötä ravintolan nimi">
                       </div>
+                        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
                         <button type="submit" class="btn btn-primary">Lisää</button>
                     </form>
                 </div>
