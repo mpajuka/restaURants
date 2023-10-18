@@ -1,12 +1,5 @@
 /* Tietokannan alustaminen */
 
-/*
-# Toteutus kesken #
-CREATE TYPE coord_pair AS (
-    lat TEXT,
-    lon TEXT
-);
- */
 DROP TABLE IF EXISTS restaurants CASCADE;
 DROP TABLE IF EXISTS reviews CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
@@ -16,8 +9,9 @@ DROP TABLE IF EXISTS opening_hours CASCADE;
 CREATE TABLE restaurants(
     id SERIAL PRIMARY KEY,
     name TEXT,
-    description TEXT/*,
-    coords coord_pair */
+    description TEXT,
+    lat FLOAT,
+    lon FLOAT
 );
 
 CREATE TYPE usertype AS ENUM('basic', 'admin');

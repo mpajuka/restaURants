@@ -116,7 +116,8 @@ def removereview(restaurantName, reviewid):
 @app.route("/restaurants/<restaurantName>", methods=["GET"])
 def restaurant(restaurantName):
     sql = text("SELECT reviews.starReview, reviews.textReview, restaurants.name,"
-               " restaurants.description, reviews.userid, reviews.reviewid "
+               " restaurants.description, reviews.userid, reviews.reviewid,"
+               " restaurants.lat, restaurants.lon "
                "FROM reviews "
                "RIGHT JOIN restaurants ON reviews.restaurantId = restaurants.id "
                "WHERE restaurants.name = :restaurantName;")
@@ -330,8 +331,6 @@ def removehours(restaurantName):
         return redirect(f"/restaurants/{restaurantName}")
 
 
-"""
-Toteutus vielä kesken
 @app.route("/addcoords/<restaurantName>", methods=["POST"])
 def addcoords(restaurantName):
     idQuery = text("SELECT id FROM restaurants WHERE name = :restaurantName")
@@ -342,16 +341,40 @@ def addcoords(restaurantName):
     lat = request.form["latitude"]
     lon = request.form["longitude"]
     if result:
+        if lon == '' or lat == '':
+            return redirect(f"/restaurants/{restaurantName}")
+
         restaurantId = result[0]
         sql = text("UPDATE restaurants "
-                   "SET coords = (:lat, :lon) "
+                   "SET (lat, lon) = (:lat, :lon) "
                    "WHERE id = :restaurantId")
         db.session.execute(sql, {"lat": lat, "lon": lon, "restaurantId": restaurantId})
         db.session.commit()
         return redirect(f"/restaurants/{restaurantName}")
     else:
         return redirect(f"/restaurants/{restaurantName}")
-"""
+
+
+@app.route("/removecoords/<restaurantName>", methods=["POST"])
+def removecoords(restaurantName):
+    if session["csrf_token"] != request.form["csrf_token"]:
+        abort(403)
+    coordQuery = text("SELECT lat, lon FROM restaurants WHERE name = :restaurantName")
+    restaurant = db.session.execute(coordQuery,
+                                    {"restaurantName": restaurantName})
+    result = restaurant.fetchone()
+
+    if result:
+        deleteCoordSql = text(" UPDATE restaurants"
+                              " SET lat = NULL, lon = NULL"
+                              " WHERE name = :restaurantName")
+        db.session.execute(deleteCoordSql, {"restaurantName": restaurantName})
+        db.session.commit()
+        return redirect(f"/restaurants/{restaurantName}")
+    else:
+        return redirect(f"/restaurants/{restaurantName}")
+
+
 
 @app.route("/logout")
 def logout():
@@ -369,17 +392,17 @@ def index():
     checkReviews = db.session.execute(sqlReviews)
     if checkReviews.fetchone():
         sql = text(
-            "SELECT restaurants.name, ROUND(AVG(starreview), 1) as average_rating "
+            "SELECT restaurants.name, ROUND(AVG(starreview), 1) as average_rating, lat, lon "
             "FROM reviews "
             "RIGHT JOIN restaurants ON reviews.restaurantid = restaurants.id "
-            "GROUP BY restaurants.name "
+            "GROUP BY restaurants.name, lat, lon "
             "ORDER BY average_rating DESC, restaurants.name ASC")
         sortedRestaurants = db.session.execute(sql)
         restaurantsData = sortedRestaurants.fetchall()
         return render_template("restaurants.html",
                                restaurants=restaurantsData)
     else:
-        sqlNoReviews = text("SELECT name FROM restaurants ORDER BY name ASC")
+        sqlNoReviews = text("SELECT name, lat, lon FROM restaurants ORDER BY name ASC")
         restaurantsNoReviews = db.session.execute(sqlNoReviews)
         data = restaurantsNoReviews.fetchall()
         return render_template("restaurants.html",

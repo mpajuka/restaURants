@@ -30,36 +30,33 @@
                 {% endif %}
                 </div>
             </div>
-
             <hr>
-            <!--
-            Toteutus kesken
-            <h4>Ravintolat kartalla</h4>
             <div style="padding-top: 20px; padding-bottom: 20px">
-                 <div id = "map" style = "width:425px; height:350px"></div>
-                  <script>
-                     // Creating map options
-                     var mapOptions = {
-                        center: [60.192059, 24.945831],
-                        zoom: 10
-                     }
-                     // Creating a map object
-                     var map = new L.map('map', mapOptions);
+            <h4>Ravintolat kartalla</h4>
+            <div id = "map" style = "width:425px; height:350px"></div>
+              <script>
+                 // Creating map options
+                 var mapOptions = {
+                    center: [60.192059, 24.945831],
+                    zoom: 10
+                 }
+                 // Creating a map object
+                 var map = new L.map('map', mapOptions);
 
-                     // Creating a Layer object
-                     var layer = new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+                 // Creating a Layer object
+                 var layer = new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
 
-                     // Adding layer to the map
-                     map.addLayer(layer);
+                 // Adding layer to the map
+                 map.addLayer(layer);
+                 {% for restaurant in restaurants %}
+                    // Creating a marker
+                    var marker = L.marker([{{ restaurant.lat }}, {{ restaurant.lon }}]);
 
-                     // Creating a marker
-                     var marker = L.marker([60.169408, 24.940805]);
-
-                     // Adding marker to the map
-                     marker.addTo(map);
-                  </script>
+                    // Adding marker to the map
+                    marker.addTo(map).bindPopup('<a href="/restaurants/{{ restaurant.name }}">{{ restaurant.name }}</a><br> {{ opening_hours }}');
+                 {% endfor %}
+              </script>
             </div>
-            -->
             <div style="display: flex; align-items: center; flex-direction: row; justify-content: space-between">
                 <h5>Ravintolan nimi</h5>
                 <h5>Keskimääräinen arvosana</h5>
