@@ -59,6 +59,13 @@ def newaccountresult():
         error = "Syöttämäsi käyttäjätunnus on jo viety"
         return render_template("newaccount.html", error=error)
     else:
+        if not newUsername or not newPassword:
+            error = "Käyttäjätunnus tai salasana puuttuu"
+            return render_template("newaccount.html", error=error)
+        if len(newPassword) < 8:
+            error = "Salasanan täytyy olla vähintään 8 merkkiä pitkä"
+            return render_template("newaccount.html", error=error)
+
         sql = text("INSERT INTO users (username, password, role) VALUES (:username, :password, 'basic')")
         db.session.execute(sql, {"username":newUsername, "password":hash_value})
         db.session.commit()
