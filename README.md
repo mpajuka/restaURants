@@ -19,7 +19,8 @@ tiedosto nimeltä `.env`ja määritä sille ympäristömuuttujat `SECRET_KEY=<sa
 sekä `DATABASE_URL=<paikallisen tietokannan osoite>`.
 
 Seuraavaksi aktivoi ympäristö ja asenna riippuvuudet, sekä alusta tietokanta
-seuraavilla komennoilla. Viimeisellä komennolla sovellus käynnistyy.
+seuraavia komentoja käyttäen, viimeisellä komennolla sovellus käynnistyy. Vaihtoehtoisesti voit tehdä saman ajamalla
+projektin juuressa komennon `./restaurants.sh`.
 
 ```bash
 python3 -m venv venv
@@ -29,23 +30,16 @@ psql < schema.sql
 flask run
 ```
 
-Sovelluksen käynnistyttyä on mahdollista testata sovellusta, aloita
-luomalla itsellesi käyttäjätunnus. Tämän jälkeen voit siirtyä kirjautumiseen,
-jonka onnistuttua pääset takaisin aloitusnäkymään. 
+Sovelluksen käynnistyttyä on mahdollista testata sovellusta, pääkäyttäjätoiminnallisuuksien testaaminen
+ei vaadi uuden käyttäjän luomista, vaan kyseisen käyttäjän toiminnallisuuksiin pääsee käsiksi tunnuksilla:
+`käyttäjätunnus: admin, salasana: password`. Peruskäyttäjän ominaisuuksia on mahdollista testata myös heti aluksi
+luomalla itselleen käyttäjätunnuksen, mutta on suositeltavaa luoda ensin ravintoloita ja lisätä tietoja
+pääkäyttäjän oikeuksilla, jonka jälkeen pystyy tarkastelemaan näitä peruskäyttäjän näkökulmasta.
 
-Aluksi tässä näkymässä
-ei voi tehdä mitään, sillä peruskäyttäjällä ei ole käyttöoikeuksia ravintolan
-lisäämiseen. Voit lisätä itsellesi pääkäyttäjän oikeudet tietokannasta seuraavalla
-komennolla:
+Tiivistetysti ominaisuuksista: pääkäyttäjä pystyy luomaan ravintolan, määrittelemään sille 
+kuvauksen, aukioloajat, kategoriat, sijainnin kartalta ja poistamaan ravintolan, sekä arvioita. Peruskäyttäjä pystyy taas
+kirjoittamaan näihin ravintoloihin arvioita, kommentein ja tähtiarviolla, sekä lukemaan muiden kirjoittamia arvioita. Sovelluksessa ravintolat
+esitetään kartalla, jossa linkin ravintolaan löytää painamalla ravintolan kuvaketta kartalla. Ravintolat ovat myös listattuna arvioiden mukaiseen
+järjestykseen, sekä niitä voi hakea kategorioiden ja hakutoiminnon avulla.
 
-```sql
-UPDATE users SET role = 'admin' WHERE username = <käyttäjänimi tähän>;
-```
-
-Tämän jälkeen kun olet uudelleenkirjautunut, pystyt lisäämään ravintoloita
-palveluun. Pääkäyttäjä pystyy luomaan ravintolan, määrittelemään sille 
-kuvauksen, aukioloajat ja poistamaan ravintolan. Peruskäyttäjä pystyy taas
-kirjoittamaan näihin ravintoloihin arvioita, kommentein ja tähtiarviolla.
-Ravintolat esitetään päävalikossa keskimääräisen arvosanan perusteella.
-
-Kartta- ja hakutoiminnallisuus, sekä ryhmäluokittelu ovat vielä toistaiseksi työn alla.
+Sovelluksen tämän hetkisessä tilassa ominaisuudet ovat siis kuvauksen mukaiset.
