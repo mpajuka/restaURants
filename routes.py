@@ -52,11 +52,18 @@ def newaccountresult():
     newUsername = request.form["username"]
     newPassword = request.form["password"]
     hash_value = generate_password_hash(newPassword)
-    sql = text("INSERT INTO users (username, password, role) VALUES (:username, :password, 'basic')")
-    db.session.execute(sql, {"username":newUsername, "password":hash_value})
-    db.session.commit()
-    error = 'Käyttäjä luotu onnistuneesti!'
-    return render_template("login.html", error=error)
+    sqlUser = text("SELECT id, password, role FROM users WHERE username=:username")
+    sqlUserResult = db.session.execute(sqlUser, {"username": newUsername})
+    userExists = sqlUserResult.fetchone()
+    if userExists:
+        error = "Syöttämäsi käyttäjätunnus on jo viety"
+        return render_template("newaccount.html", error=error)
+    else:
+        sql = text("INSERT INTO users (username, password, role) VALUES (:username, :password, 'basic')")
+        db.session.execute(sql, {"username":newUsername, "password":hash_value})
+        db.session.commit()
+        error = 'Käyttäjä luotu onnistuneesti!'
+        return render_template("login.html", error=error)
 
 
 @app.route("/addrestaurant", methods=["POST"])
