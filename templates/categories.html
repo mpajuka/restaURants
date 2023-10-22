@@ -17,6 +17,9 @@
     <hr>
     <h4>Kategoriat</h4>
     <hr>
+    {% if not categoryData %}
+    <p>Ei vielä kategorioita</p>
+    {% endif %}
     {%  for category in categoryData %}
         <div style="display: flex; align-items: center; flex-direction: row; justify-content: space-between">
             <a href="/searchrestaurant/{{ category.type }}">{{ category.type }}</a>
