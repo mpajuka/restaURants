@@ -95,6 +95,7 @@
                 </form>
                 <hr>
                 {% else %}
+                <h5>Sijainti kartalla</h5>
                 <div style="padding-top: 20px; padding-bottom: 20px">
                      <div id = "map" style = "width:425px; height:350px"></div>
                       <script>
@@ -131,6 +132,7 @@
             {% endif %}
             {% else %}
                 {% if reviews[0].lat %}
+                    <h5>Sijainti kartalla</h5>
                 <div style="padding-top: 20px; padding-bottom: 20px">
                      <div id = "map" style = "width:425px; height:350px"></div>
                       <script>
@@ -403,7 +405,7 @@
                 {% endif %}
                 <hr>
             {% else %}
-                <p>Ei vielä yhtään arviota</p>
+                <p>Ei vielä arvioita</p>
             {% endif %}
         {% endfor %}
     </div>

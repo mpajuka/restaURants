@@ -1,11 +1,6 @@
 /* Tietokannan alustaminen */
 
 DROP TABLE IF EXISTS restaurants CASCADE;
-DROP TABLE IF EXISTS reviews CASCADE;
-DROP TABLE IF EXISTS users CASCADE;
-DROP TABLE IF EXISTS opening_hours CASCADE;
-
-
 CREATE TABLE restaurants(
     id SERIAL PRIMARY KEY,
     name TEXT,
@@ -16,6 +11,7 @@ CREATE TABLE restaurants(
 
 CREATE TYPE usertype AS ENUM('basic', 'admin');
 
+DROP TABLE IF EXISTS users CASCADE;
 CREATE TABLE users(
     id SERIAL PRIMARY KEY,
     username TEXT,
@@ -23,6 +19,7 @@ CREATE TABLE users(
     role usertype
 );
 
+DROP TABLE IF EXISTS opening_hours CASCADE;
 CREATE TABLE opening_hours(
     restaurantId INT,
     openDay INT,
@@ -33,6 +30,7 @@ CREATE TABLE opening_hours(
             REFERENCES restaurants(id)
 );
 
+DROP TABLE IF EXISTS reviews CASCADE;
 CREATE TABLE reviews(
     reviewId SERIAL PRIMARY KEY,
     restaurantId INT,
@@ -49,6 +47,7 @@ CREATE TABLE reviews(
 
 );
 
+DROP TABLE IF EXISTS restaurant_group CASCADE;
 CREATE TABLE restaurant_group(
     id SERIAL PRIMARY KEY,
     restaurantId INT,
@@ -60,7 +59,7 @@ CREATE TABLE restaurant_group(
 
 INSERT INTO users(username, password, role)
 VALUES('admin',
-       'pbkdf2:sha256:600000$LA066yJik2jkpYwo$e4c6afd6706b46cfe89a847202ead61d9d1d5b3137976b395d8a382f623cf061',
+       'pbkdf2:sha256:600000$tV8LHbfQh08SNKsQ$049525b6b90551189f8c6914d6ff43015727ff1c16af1eaa62261403d613a0be',
        'admin');
 
 /*

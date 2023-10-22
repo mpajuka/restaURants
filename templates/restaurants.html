@@ -78,12 +78,17 @@
                 <h5>Keskimääräinen arvosana</h5>
             </div>
             <hr>
+            {% if not restaurants %}
+                <p>Ei vielä ravintoloita</p>
+            {% endif %}
             {%  for restaurant in restaurants %}
                 <div style="display: flex; align-items: center; flex-direction: row; justify-content: space-between">
                     <a href="/restaurants/{{ restaurant.name }}">{{ restaurant.name }}</a>
                     <input type="hidden" id="restaurantName" name="restaurantName">
                     {% if restaurant.average_rating %}
                     <p><b>{{ restaurant.average_rating }}</b></p>
+                        {% else %}
+                        <p><b>—</b></p>
                     {% endif %}
                 </div>
                 <hr>
