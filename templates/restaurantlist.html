@@ -13,9 +13,13 @@
 <body>
 
     <div class="container" style="padding-top: 20px; padding-bottom: 20px">
-    <a href="/" class="btn btn-outline-primary">Takaisin valikkoon</a>
+    <a href="/categories" class="btn btn-outline-primary">Takaisin kategorioihin</a>
     <hr>
+    {% if searchWord %}
     <h4>Näiden ravintoloiden kuvauksissa esiintyi sana '{{ searchWord }}'</h4>
+    {% else %}
+    <h4>Ravintolat kategorialla '{{ category }}'</h4>
+    {% endif %}
     <hr>
         {%  for restaurant in restaurants %}
             <div style="display: flex; align-items: center; flex-direction: row; justify-content: space-between">

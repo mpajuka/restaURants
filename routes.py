@@ -1,11 +1,12 @@
 import secrets
 from os import abort
 
-from flask import render_template, redirect, session, request
+from flask import render_template, redirect, session, request, flash, url_for
 from sqlalchemy.sql import text
 from werkzeug.security import check_password_hash, generate_password_hash
 from db import db
 from app import app
+
 
 @app.route("/login")
 def login():
@@ -14,6 +15,7 @@ def login():
 
 @app.route("/loginresult", methods=["POST"])
 def loginresult():
+    error = None
     username = request.form["username"]
     password = request.form["password"]
     sql = text("SELECT id, password, role FROM users WHERE username=:username")
@@ -21,7 +23,7 @@ def loginresult():
     user = result.fetchone()
     if not user:
         # TODO: invalid username
-        return redirect("/login")
+        error = 'Käyttäjää ei ole olemassa'
     else:
         hash_value = user.password
         if check_password_hash(hash_value, password):
@@ -36,7 +38,13 @@ def loginresult():
             return redirect("/")
         else:
             # TODO: invalid password
-            return redirect("/login")
+            error = 'Väärä salasana'
+    return render_template("login.html", error=error)
+
+
+@app.route("/newaccount")
+def newaccount():
+    return render_template("newaccount.html")
 
 
 @app.route("/newaccountresult", methods=["POST"])
@@ -47,12 +55,8 @@ def newaccountresult():
     sql = text("INSERT INTO users (username, password, role) VALUES (:username, :password, 'basic')")
     db.session.execute(sql, {"username":newUsername, "password":hash_value})
     db.session.commit()
-    return redirect("/login")
-
-
-@app.route("/newaccount")
-def newaccount():
-    return render_template("newaccount.html")
+    error = 'Käyttäjä luotu onnistuneesti!'
+    return render_template("login.html", error=error)
 
 
 @app.route("/addrestaurant", methods=["POST"])
@@ -68,115 +72,6 @@ def addrestaurant():
     db.session.execute(sql, {"restaurantName": newRestaurantName})
     db.session.commit()
     return redirect("/")
-
-
-@app.route("/removerestaurant/<restaurantName>", methods=["POST"])
-def removerestaurant(restaurantName):
-    if session["csrf_token"] != request.form["csrf_token"]:
-        abort(403)
-    idQuery = text("SELECT id FROM restaurants WHERE name = :restaurantName")
-    restaurantQuery = db.session.execute(idQuery,
-                                    {"restaurantName": restaurantName})
-    restaurantExists = restaurantQuery.fetchone()
-
-    if restaurantExists:
-        restaurantId = restaurantExists[0]
-        reviewsQuery = text("SELECT * FROM reviews WHERE restaurantid = :restaurantId")
-        reviews = db.session.execute(reviewsQuery, {"restaurantId": restaurantId})
-        reviewsExist = reviews.fetchone()
-
-        sqlHours = text(
-            "DELETE FROM opening_hours WHERE restaurantid = :restaurantId")
-        sqlReviews = text(
-            "DELETE FROM reviews WHERE restaurantid = :restaurantId")
-        sqlRestaurants = text(
-            "DELETE FROM restaurants WHERE id = :restaurantId")
-
-        if reviewsExist:
-            db.session.execute(sqlHours, {"restaurantId": restaurantId})
-            db.session.execute(sqlReviews, {"restaurantId": restaurantId})
-            db.session.execute(sqlRestaurants, {"restaurantId": restaurantId})
-        else:
-            db.session.execute(sqlHours, {"restaurantId": restaurantId})
-            db.session.execute(sqlRestaurants, {"restaurantId": restaurantId})
-
-        db.session.commit()
-        return redirect("/")
-    else:
-        return redirect(f"/restaurants/{restaurantName}")
-
-@app.route("/removereview/<restaurantName>/<reviewid>", methods=["POST"])
-def removereview(restaurantName, reviewid):
-    sql = text("DELETE FROM reviews WHERE reviewid = :reviewid")
-    db.session.execute(sql, {"reviewid": reviewid})
-    db.session.commit()
-    return redirect(f"/restaurants/{restaurantName}")
-
-
-@app.route("/restaurants/<restaurantName>", methods=["GET"])
-def restaurant(restaurantName):
-    sql = text("SELECT reviews.starReview, reviews.textReview, restaurants.name,"
-               " restaurants.description, reviews.userid, reviews.reviewid,"
-               " restaurants.lat, restaurants.lon "
-               "FROM reviews "
-               "RIGHT JOIN restaurants ON reviews.restaurantId = restaurants.id "
-               "WHERE restaurants.name = :restaurantName;")
-    reviews = db.session.execute(sql, {"restaurantName": restaurantName})
-    data = reviews.fetchall()
-
-    session["reviewed"] = "false"
-    userId = session.get("id")
-    reviewsSql = text("SELECT reviews.userId, restaurants.name "
-                      "FROM reviews "
-                      "RIGHT JOIN restaurants ON reviews.restaurantId = restaurants.id "
-                      "WHERE userId = :userId AND restaurants.name = :restaurantName")
-    userIdInReviews = db.session.execute(reviewsSql, {"userId": userId,
-                                                      "restaurantName": restaurantName})
-    alreadyReviewed = userIdInReviews.fetchall()
-    if alreadyReviewed:
-        session["reviewed"] = "true"
-
-    if data:
-        opening_hours_sql = text("SELECT openDay, openHourStart, openHourEnd "
-                                 "FROM opening_hours "
-                                 "INNER JOIN restaurants ON opening_hours.restaurantId = restaurants.id "
-                                 "WHERE restaurants.name = :restaurantName;")
-        hoursResult = db.session.execute(opening_hours_sql, {"restaurantName": restaurantName})
-        hoursData = hoursResult.fetchall()
-        starreview_sum = 0
-        count = 0
-        for i in data:
-            if i.starreview is not None:
-                starreview_sum += int(i.starreview)
-                count += 1
-        if starreview_sum != 0:
-            meanScore = starreview_sum / count
-            return render_template("restaurant.html",
-                               restaurantName=restaurantName,
-                               reviews=data,
-                               meanScore="{:.1f}".format(meanScore),
-                                openingHours=hoursData)
-        else:
-            return render_template("restaurant.html",
-                                   restaurantName=restaurantName,
-                                   openingHours=hoursData,
-                                   reviews=data)
-    else:
-        return redirect("/")
-
-@app.route("/searchrestaurant", methods=["POST"])
-def searchrestaurant():
-    searchWord = request.form["word"]
-    searchWordFormatted = f'%{searchWord}%'
-    sql = text("SELECT * FROM restaurants WHERE description ILIKE :searchWordFormatted ")
-    restaurants = db.session.execute(sql, {"searchWordFormatted": searchWordFormatted})
-    result = restaurants.fetchall()
-    if result:
-        return render_template("restaurantlist.html", restaurants=result,
-                               searchWord=searchWord)
-    else:
-        return redirect("/")
-
 
 
 @app.route("/addreview/<restaurantName>", methods=["POST"])
@@ -218,17 +113,6 @@ def adddescription(restaurantName):
     db.session.commit()
     return redirect(f'/restaurants/{restaurantName}')
 
-
-@app.route("/removedescription/<restaurantName>", methods=["POST"])
-def removedescription(restaurantName):
-    if session["csrf_token"] != request.form["csrf_token"]:
-        abort(403)
-    sql = text("UPDATE restaurants "
-               "SET description = ''"
-                "WHERE name = :restaurantName; ")
-    db.session.execute(sql, {"restaurantName": restaurantName})
-    db.session.commit()
-    return redirect(f"/restaurants/{restaurantName}")
 
 @app.route("/addhours/<restaurantName>", methods=["POST"])
 def addhours(restaurantName):
@@ -312,27 +196,11 @@ def addhours(restaurantName):
     else:
         return redirect(f"/restaurants/{restaurantName}")
 
-@app.route("/removehours/<restaurantName>", methods=["POST"])
-def removehours(restaurantName):
-    if session["csrf_token"] != request.form["csrf_token"]:
-        abort(403)
-    idQuery = text("SELECT id FROM restaurants WHERE name = :restaurantName")
-    restaurant = db.session.execute(idQuery,
-                                    {"restaurantName": restaurantName})
-    result = restaurant.fetchone()
-
-    if result:
-        restaurantId = result[0]
-        sql = text("DELETE FROM opening_hours WHERE restaurantid = :restaurantId")
-        db.session.execute(sql, {"restaurantId": restaurantId})
-        db.session.commit()
-        return redirect(f"/restaurants/{restaurantName}")
-    else:
-        return redirect(f"/restaurants/{restaurantName}")
-
 
 @app.route("/addcoords/<restaurantName>", methods=["POST"])
 def addcoords(restaurantName):
+    if session["csrf_token"] != request.form["csrf_token"]:
+        abort(403)
     idQuery = text("SELECT id FROM restaurants WHERE name = :restaurantName")
     restaurant = db.session.execute(idQuery,
                                     {"restaurantName": restaurantName})
@@ -349,6 +217,125 @@ def addcoords(restaurantName):
                    "SET (lat, lon) = (:lat, :lon) "
                    "WHERE id = :restaurantId")
         db.session.execute(sql, {"lat": lat, "lon": lon, "restaurantId": restaurantId})
+        db.session.commit()
+        return redirect(f"/restaurants/{restaurantName}")
+    else:
+        return redirect(f"/restaurants/{restaurantName}")
+
+
+@app.route("/addcategory/<restaurantName>", methods=["POST"])
+def addcategory(restaurantName):
+    if session["csrf_token"] != request.form["csrf_token"]:
+        abort(403)
+
+    idQuery = text("SELECT id FROM restaurants WHERE name = :restaurantName")
+    restaurant = db.session.execute(idQuery,
+                                        {"restaurantName": restaurantName})
+    result = restaurant.fetchone()
+    category = request.form["category"]
+
+
+    if result:
+        if category == '':
+            return redirect(f"/restaurants/{restaurantName}")
+
+        restaurantId = result[0]
+
+        categoryExistsQuery = text("SELECT type "
+                                   "FROM restaurant_group "
+                                   "WHERE type = :category AND restaurantId = :restaurantId")
+        categoryExistsResult = db.session.execute(categoryExistsQuery,
+                                                  {"category": category,
+                                                   "restaurantId": restaurantId})
+        if categoryExistsResult.fetchone():
+            return redirect(f"/restaurants/{restaurantName}")
+
+        sql = text("INSERT INTO restaurant_group(restaurantId, type)"
+                   "VALUES (:restaurantId, :category) ")
+        db.session.execute(sql, {"restaurantId": restaurantId,
+                                 "category": category})
+        db.session.commit()
+        return redirect(f"/restaurants/{restaurantName}")
+    else:
+        return redirect(f"/restaurants/{restaurantName}")
+
+
+@app.route("/removerestaurant/<restaurantName>", methods=["POST"])
+def removerestaurant(restaurantName):
+    if session["csrf_token"] != request.form["csrf_token"]:
+        abort(403)
+    idQuery = text("SELECT id FROM restaurants WHERE name = :restaurantName")
+    restaurantQuery = db.session.execute(idQuery,
+                                    {"restaurantName": restaurantName})
+    restaurantExists = restaurantQuery.fetchone()
+
+    if restaurantExists:
+        restaurantId = restaurantExists[0]
+        reviewsQuery = text("SELECT * FROM reviews WHERE restaurantid = :restaurantId")
+        reviews = db.session.execute(reviewsQuery, {"restaurantId": restaurantId})
+        reviewsExist = reviews.fetchone()
+
+        sqlHours = text(
+            "DELETE FROM opening_hours WHERE restaurantid = :restaurantId")
+        sqlReviews = text(
+            "DELETE FROM reviews WHERE restaurantid = :restaurantId")
+        sqlRestaurants = text(
+            "DELETE FROM restaurants WHERE id = :restaurantId")
+        sqlGroups = text(
+            "DELETE FROM restaurant_group WHERE restaurantId = :restaurantId"
+        )
+
+        if reviewsExist:
+            db.session.execute(sqlHours, {"restaurantId": restaurantId})
+            db.session.execute(sqlReviews, {"restaurantId": restaurantId})
+            db.session.execute(sqlGroups, {"restaurantId": restaurantId})
+            db.session.execute(sqlRestaurants, {"restaurantId": restaurantId})
+        else:
+            db.session.execute(sqlHours, {"restaurantId": restaurantId})
+            db.session.execute(sqlGroups, {"restaurantId": restaurantId})
+            db.session.execute(sqlRestaurants, {"restaurantId": restaurantId})
+
+        db.session.commit()
+        return redirect("/")
+    else:
+        return redirect(f"/restaurants/{restaurantName}")
+
+
+@app.route("/removereview/<restaurantName>/<reviewid>", methods=["POST"])
+def removereview(restaurantName, reviewid):
+    if session["csrf_token"] != request.form["csrf_token"]:
+        abort(403)
+    sql = text("DELETE FROM reviews WHERE reviewid = :reviewid")
+    db.session.execute(sql, {"reviewid": reviewid})
+    db.session.commit()
+    return redirect(f"/restaurants/{restaurantName}")
+
+
+@app.route("/removedescription/<restaurantName>", methods=["POST"])
+def removedescription(restaurantName):
+    if session["csrf_token"] != request.form["csrf_token"]:
+        abort(403)
+    sql = text("UPDATE restaurants "
+               "SET description = ''"
+                "WHERE name = :restaurantName; ")
+    db.session.execute(sql, {"restaurantName": restaurantName})
+    db.session.commit()
+    return redirect(f"/restaurants/{restaurantName}")
+
+
+@app.route("/removehours/<restaurantName>", methods=["POST"])
+def removehours(restaurantName):
+    if session["csrf_token"] != request.form["csrf_token"]:
+        abort(403)
+    idQuery = text("SELECT id FROM restaurants WHERE name = :restaurantName")
+    restaurant = db.session.execute(idQuery,
+                                    {"restaurantName": restaurantName})
+    result = restaurant.fetchone()
+
+    if result:
+        restaurantId = result[0]
+        sql = text("DELETE FROM opening_hours WHERE restaurantid = :restaurantId")
+        db.session.execute(sql, {"restaurantId": restaurantId})
         db.session.commit()
         return redirect(f"/restaurants/{restaurantName}")
     else:
@@ -374,7 +361,126 @@ def removecoords(restaurantName):
     else:
         return redirect(f"/restaurants/{restaurantName}")
 
+@app.route("/removecategory/<restaurantName>/<category>", methods=["POST"])
+def removecategory(restaurantName, category):
+    if session["csrf_token"] != request.form["csrf_token"]:
+        abort(403)
 
+    idQuery = text("SELECT id FROM restaurants WHERE name = :restaurantName")
+    restaurant = db.session.execute(idQuery,
+                                    {"restaurantName": restaurantName})
+    result = restaurant.fetchone()
+
+    if result:
+        restaurantId = result[0]
+        sql = text(
+            "DELETE FROM restaurant_group "
+            "WHERE restaurantid = :restaurantId AND type = :category ")
+        db.session.execute(sql, {"restaurantId": restaurantId,
+                                 "category": category})
+        db.session.commit()
+        return redirect(f"/restaurants/{restaurantName}")
+    else:
+        return redirect(f"/restaurants/{restaurantName}")
+
+
+@app.route("/restaurants/<restaurantName>", methods=["GET"])
+def restaurant(restaurantName):
+    sql = text("SELECT reviews.starReview, reviews.textReview, restaurants.name,"
+               " restaurants.description, reviews.userid, reviews.reviewid,"
+               " restaurants.lat, restaurants.lon "
+               "FROM reviews "
+               "RIGHT JOIN restaurants ON reviews.restaurantId = restaurants.id "
+               "WHERE restaurants.name = :restaurantName;")
+    reviews = db.session.execute(sql, {"restaurantName": restaurantName})
+    data = reviews.fetchall()
+
+    session["reviewed"] = "false"
+    userId = session.get("id")
+    reviewsSql = text("SELECT reviews.userId, restaurants.name "
+                      "FROM reviews "
+                      "RIGHT JOIN restaurants ON reviews.restaurantId = restaurants.id "
+                      "WHERE userId = :userId AND restaurants.name = :restaurantName")
+    userIdInReviews = db.session.execute(reviewsSql, {"userId": userId,
+                                                      "restaurantName": restaurantName})
+    alreadyReviewed = userIdInReviews.fetchall()
+    if alreadyReviewed:
+        session["reviewed"] = "true"
+
+    if data:
+        opening_hours_sql = text("SELECT openDay, openHourStart, openHourEnd "
+                                 "FROM opening_hours "
+                                 "INNER JOIN restaurants ON opening_hours.restaurantId = restaurants.id "
+                                 "WHERE restaurants.name = :restaurantName;")
+        hoursResult = db.session.execute(opening_hours_sql, {"restaurantName": restaurantName})
+        hoursData = hoursResult.fetchall()
+        category_data_sql = text("SELECT type "
+                                 "FROM restaurant_group "
+                                 "INNER JOIN restaurants ON restaurant_group.restaurantId = restaurants.id "
+                                 "WHERE restaurants.name = :restaurantName ")
+        categoryDataResult = db.session.execute(category_data_sql, {"restaurantName": restaurantName})
+        categoryData = categoryDataResult.fetchall()
+        starreview_sum = 0
+        count = 0
+        for i in data:
+            if i.starreview is not None:
+                starreview_sum += int(i.starreview)
+                count += 1
+        if starreview_sum != 0:
+            meanScore = starreview_sum / count
+            return render_template("restaurant.html",
+                               restaurantName=restaurantName,
+                               reviews=data,
+                               meanScore="{:.1f}".format(meanScore),
+                                openingHours=hoursData,
+                                   categoryData=categoryData)
+        else:
+            return render_template("restaurant.html",
+                                   restaurantName=restaurantName,
+                                   openingHours=hoursData,
+                                   reviews=data,
+                                   categoryData=categoryData)
+    else:
+        return redirect("/")
+
+
+@app.route("/searchrestaurant", methods=["POST"])
+def searchrestaurant():
+    searchWord = request.form["word"]
+    searchWordFormatted = f'%{searchWord}%'
+    sql = text("SELECT * FROM restaurants WHERE description ILIKE :searchWordFormatted ")
+    restaurants = db.session.execute(sql, {"searchWordFormatted": searchWordFormatted})
+    result = restaurants.fetchall()
+    if result:
+        return render_template("restaurantlist.html", restaurants=result,
+                               searchWord=searchWord)
+    else:
+        return redirect("/")
+
+
+@app.route("/categories")
+def categories():
+    category_data_sql = text("SELECT type "
+                             "FROM restaurant_group "
+                             "INNER JOIN restaurants ON restaurant_group.restaurantId = restaurants.id "
+                             "GROUP BY type ")
+    categoryDataResult = db.session.execute(category_data_sql)
+    categoryData = categoryDataResult.fetchall()
+
+    return render_template("categories.html", categoryData=categoryData)
+
+
+@app.route("/searchrestaurant/<category>")
+def searchbycategory(category):
+    sql = text("SELECT restaurants.name "
+               "FROM restaurant_group "
+               "INNER JOIN restaurants ON restaurant_group.restaurantId = restaurants.id "
+               "WHERE type = :category;")
+    restaurantDataResult = db.session.execute(sql, {"category": category})
+    restaurantData = restaurantDataResult.fetchall()
+    if restaurantData:
+        return render_template("restaurantlist.html", restaurants=restaurantData,
+                               category=category)
 
 @app.route("/logout")
 def logout():

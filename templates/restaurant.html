@@ -15,14 +15,13 @@
 </head>
 <body>
     <div class="container" style="padding-top: 20px; padding-bottom: 20px">
-    <a href="/" class="btn btn-outline-primary">Takaisin valikkoon</a>
+    <a href="/" class="btn btn-outline-primary">Takaisin päävalikkoon</a>
         <hr>
         <div style="display: flex; justify-content: space-between; align-items: center">
             <h1>{{ restaurantName }}</h1>
             {% if meanScore %}
                 <h4>Keskimääräinen arvosana: {{ meanScore }}</h4>
             {% endif %}
-
         </div>
         {% if session.role == 'admin' %}
             <form action="/removerestaurant/{{ restaurantName }}" method="POST"
@@ -31,19 +30,29 @@
                 <button type="submit" class="btn btn-danger">Poista ravintola</button>
             </form>
             <hr>
-            {% if not reviews[0].lat %}
-                <form action="/addcoords/{{ restaurantName }}" method="POST">
-                    <div>
-                        <input type="hidden" name="latitude" id="latitude">
-                    </div>
-                    <div>
-                        <input type="hidden" name="longitude" id="longitude">
-                        <button style="margin-top: 10px;" type="submit" class="btn btn-warning">Lisää sijainti</button>
-
-                    </div>
-
+        {% endif %}
+        {% if reviews[0].description %}
+            <p style="margin-top: 10px"><i>{{ reviews[0].description }}</i></p>
+            {% if session.role == 'admin' %}
+                <form action="/removedescription/{{ restaurantName }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+                    <button type="submit" class="btn btn-warning">Luo uusi kuvaus</button>
                 </form>
-                <hr>
+            {% endif %}
+        {% else %}
+            {% if session.role == 'admin' %}
+                <h5>Lisää puuttuva kuvaus!</h5>
+                <form action="/adddescription/{{ restaurantName }}" method="POST">
+                    <textarea class="form-control" id="description" name="description" placeholder="Kuvaus ravintolasta..."></textarea>
+                    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+                    <button type="submit" style="margin-top: 10px;" class="btn btn-success">Lähetä kuvaus</button>
+                </form>
+            {% endif %}
+        {% endif %}
+        <hr>
+        {% if session.role == 'admin' %}
+            {% if not reviews[0].lat %}
+
                 <div style="padding-top: 20px; padding-bottom: 20px">
                      <div id = "map" style = "width:425px; height:350px"></div>
                       <script>
@@ -75,43 +84,18 @@
                          });
                       </script>
                 </div>
-                {% else %}
-                <div style="padding-top: 20px; padding-bottom: 20px">
-                     <div id = "map" style = "width:425px; height:350px"></div>
-                      <script>
-                         // Creating map options
-
-                         var mapOptions = {
-                            center: [{{ reviews[0].lat }}, {{ reviews[0].lon }}],
-                            zoom: 10
-                         }
-                         // Creating a map object
-                         var map = new L.map('map', mapOptions);
-
-                         // Creating a Layer object
-                         var layer = new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
-
-                         // Adding layer to the map
-                         map.addLayer(layer);
-
-                         // Creating a marker
-
-                         var markerGroup = L.layerGroup().addTo(map);
-                         var marker = L.marker([{{ reviews[0].lat }}, {{ reviews[0].lon }}]);
-                         marker.addTo(map);
-
-                      </script>
-                </div>
-
-
-                <form action="/removecoords/{{ restaurantName }}" method="POST">
-                    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-                    <button type="submit" class="btn btn-warning">Poista sijainti</button>
+                <p><i>Vinkki: Voit lisätä ravintolalle sijannin merkitsemällä sen kartalle hiiren avulla</i></p>
+                <form action="/addcoords/{{ restaurantName }}" method="POST">
+                    <div>
+                        <input type="hidden" name="latitude" id="latitude">
+                        <input type="hidden" name="longitude" id="longitude">
+                        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+                        <button style="margin-top: 10px;" type="submit" class="btn btn-success">Lisää sijainti</button>
+                    </div>
                 </form>
                 <hr>
-            {% endif %}
-            {% else %}
-            <div style="padding-top: 20px; padding-bottom: 20px">
+                {% else %}
+                <div style="padding-top: 20px; padding-bottom: 20px">
                      <div id = "map" style = "width:425px; height:350px"></div>
                       <script>
                          // Creating map options
@@ -137,27 +121,48 @@
 
                       </script>
                 </div>
-        {% endif %}
-        {% if reviews[0].description %}
-            <p style="margin-top: 10px">{{ reviews[0].description }}</p>
-            {% if session.role == 'admin' %}
-                <form action="/removedescription/{{ restaurantName }}" method="POST">
+
+
+                <form action="/removecoords/{{ restaurantName }}" method="POST">
                     <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-                    <button type="submit" class="btn btn-warning">Luo uusi kuvaus</button>
+                    <button type="submit" class="btn btn-warning">Luo uusi sijainti</button>
                 </form>
+                <hr>
             {% endif %}
-        {% else %}
-            {% if session.role == 'admin' %}
-                <h5>Lisää puuttuva kuvaus!</h5>
-                <form action="/adddescription/{{ restaurantName }}" method="POST">
-                    <textarea class="form-control" id="description" name="description" placeholder="Kuvaus ravintolasta..."></textarea>
-                    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
-                    <button type="submit" style="margin-top: 10px;" class="btn btn-success">Lähetä kuvaus</button>
-                </form>
-            {% endif %}
+            {% else %}
+                {% if reviews[0].lat %}
+                <div style="padding-top: 20px; padding-bottom: 20px">
+                     <div id = "map" style = "width:425px; height:350px"></div>
+                      <script>
+                         // Creating map options
+
+                         var mapOptions = {
+                            center: [{{ reviews[0].lat }}, {{ reviews[0].lon }}],
+                            zoom: 15
+                         }
+                         // Creating a map object
+                         var map = new L.map('map', mapOptions);
+
+                         // Creating a Layer object
+                         var layer = new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+
+                         // Adding layer to the map
+                         map.addLayer(layer);
+
+                         // Creating a marker
+
+                         var markerGroup = L.layerGroup().addTo(map);
+                         var marker = L.marker([{{ reviews[0].lat }}, {{ reviews[0].lon }}]);
+                         marker.addTo(map);
+
+                      </script>
+                </div>
+                {% endif %}
         {% endif %}
-        {% if openingHours %}
-            <hr>
+        <div style="display: flex; justify-content: flex-start">
+        <div style="padding-right: 100px">
+            {% if openingHours %}
+
             <h5>Aukioloajat</h5>
             <table>
             {% for hour in openingHours %}
@@ -234,7 +239,7 @@
             {% endif %}
         {% else %}
             {% if session.role == 'admin' %}
-                <hr>
+
                 <h5 style="padding-top: 10px">Lisää puuttuvat aukioloajat</h5>
                 <form action="/addhours/{{ restaurantName }}" method="POST">
                     <div>
@@ -302,8 +307,55 @@
                     </div>
                 </form>
             {% endif %}
+
         {% endif %}
+        </div>
+        <div>
+        {% if session.role == 'admin' %}
+
+        <form action="/addcategory/{{ restaurantName }}" method="POST">
+            <div>
+                <h5>Lisää ravintolalle kuvaava kategoria</h5>
+                <div>
+                    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+                    <input type="text" name="category" id="category">
+                </div>
+                <button style="margin-top: 10px;" type="submit" class="btn btn-success">Lisää kategoria</button>
+            </div>
+        </form>
         <hr>
+        <h6>Aiemmin lisätyt kategoriat:</h6>
+        <ul>
+            {% for category in categoryData %}
+                <li style="padding-bottom: 10px">
+                     <form action="/removecategory/{{ restaurantName }}/{{ category.type }}" method="POST">
+                         <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+                         {{ category.type }}
+                        <button class="btn btn-danger btn-sm" type="submit">Poista kategoria</button>
+                    </form>
+                </li>
+
+            {% endfor %}
+        </ul>
+        {% else %}
+            {% if categoryData %}
+
+            <h5>Ravintolan kategoriat</h5>
+            {% for category in categoryData %}
+                <li style="padding-bottom: 10px">
+                    {{ category.type }}
+                </li>
+
+            {% endfor %}
+            {% endif %}
+
+        {% endif %}
+        </div>
+
+        </div>
+        <hr>
+
+
         {% if not session.username %}
             <h5>Kirjaudu sisään jättääksesi arvion: </h5>
             <a style="margin-top: 10px; margin-bottom: 10px" class="btn btn-primary" href="{{  url_for('login') }}">Kirjautumiseen</a>
@@ -345,6 +397,7 @@
                 <h5>Arvio: </h5> {{ review.textreview }}
                 {% if review.userid == session["id"] or session["role"] == 'admin' %}
                     <form action="/removereview/{{ restaurantName }}/{{ review.reviewid }}" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
                         <button style="margin-top: 10px; margin-bottom: 10px" class="btn btn-danger">Poista arvio</button>
                     </form>
                 {% endif %}

@@ -8,11 +8,25 @@
     <link rel = "stylesheet" href = "http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css"/>
     <script src = "http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
 
+    <style>
+        @media screen and (max-width: 1000px) {
+          .menubar {
+            flex-direction: column;
+          }
+            .menubar > * {
+                padding-bottom: 15px;
+            }
+        }
+    </style>
 </head>
 <body>
         <div class="container" style="padding-top: 20px; padding-bottom: 20px">
-            <div style="display: flex; justify-content: space-between; align-items: center">
+            {% if notification %}
+                <p class="alert"><strong>{{ notification }}</strong></p>
+            {% endif %}
+            <div class="menubar" style="display: flex; justify-content: space-between; align-items: center">
                 <h1><i class="bi bi-pin-map-fill"></i> Ravintolat</h1>
+                <h5><a href="/categories">Kaikki kategoriat</a></h5>
                 <form class="form-inline" action="/searchrestaurant" method="POST">
                     <input placeholder="Hae kuvauksella" class="form-control mr-sm-2" name="word" type="search">
                     <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Hae</button>
@@ -33,12 +47,12 @@
             <hr>
             <div style="padding-top: 20px; padding-bottom: 20px">
             <h4>Ravintolat kartalla</h4>
-            <div id = "map" style = "width:425px; height:350px"></div>
+            <div id = "map" style = "width: 100%; height:45em"></div>
               <script>
                  // Creating map options
                  var mapOptions = {
                     center: [60.192059, 24.945831],
-                    zoom: 10
+                    zoom: 11
                  }
                  // Creating a map object
                  var map = new L.map('map', mapOptions);
@@ -50,10 +64,12 @@
                  map.addLayer(layer);
                  {% for restaurant in restaurants %}
                     // Creating a marker
-                    var marker = L.marker([{{ restaurant.lat }}, {{ restaurant.lon }}]);
+                     {% if restaurant.lat %}
+                        var marker = L.marker([{{ restaurant.lat }}, {{ restaurant.lon }}]);
 
-                    // Adding marker to the map
-                    marker.addTo(map).bindPopup('<a href="/restaurants/{{ restaurant.name }}">{{ restaurant.name }}</a><br> {{ opening_hours }}');
+                        // Adding marker to the map
+                        marker.addTo(map).bindPopup('<a href="/restaurants/{{ restaurant.name }}">{{ restaurant.name }}</a><br> {{ opening_hours }}');
+                     {% endif %}
                  {% endfor %}
               </script>
             </div>
@@ -89,5 +105,6 @@
                 </div>
             {% endif %}
         </div>
+
 </body>
 </html>
