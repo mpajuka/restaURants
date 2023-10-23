@@ -465,7 +465,7 @@ def searchrestaurant():
     sql = text("SELECT * FROM restaurants WHERE description ILIKE :searchWordFormatted ")
     restaurants = db.session.execute(sql, {"searchWordFormatted": searchWordFormatted})
     result = restaurants.fetchall()
-    if result:
+    if result and searchWord:
         return render_template("restaurantlist.html", restaurants=result,
                                searchWord=searchWord)
     else:
@@ -501,6 +501,7 @@ def logout():
     del session["username"]
     try:
         del session["role"]
+        del session["id"]
     except:
         pass
     return redirect("/")
