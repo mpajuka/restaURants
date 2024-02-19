@@ -1,4 +1,5 @@
 # Ravintolat
+
 Sovelluksessa näkyy tietyn alueen ravintolat, joista voi etsiä tietoa ja lukea arvioita. Jokainen käyttäjä on peruskäyttäjä tai ylläpitäjä.
 
 - Käyttäjä voi kirjautua sisään ja ulos sekä luoda uuden tunnuksen.
@@ -43,3 +44,8 @@ esitetään kartalla, jossa linkin ravintolaan löytää painamalla ravintolan k
 järjestykseen, sekä niitä voi hakea kategorioiden ja hakutoiminnon avulla.
 
 Sovelluksen tämän hetkisessä tilassa ominaisuudet ovat siis kuvauksen mukaiset.
+
+## Kuvat
+<img alt="sovelluskuva1" src="https://github.com/mpajuka/restaurants/assets/56785774/d1210177-ddd6-456f-b023-305308504e4e">
+
+<img alt="sovelluskuva2" src="https://github.com/mpajuka/restaurants/assets/56785774/e8250e54-5e4e-4e29-8413-eea548cac69f">
