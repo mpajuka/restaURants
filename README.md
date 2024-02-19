@@ -1,19 +1,18 @@
 # Ravintolat
 
-Sovelluksessa näkyy tietyn alueen ravintolat, joista voi etsiä tietoa ja lukea arvioita. Jokainen käyttäjä on peruskäyttäjä tai ylläpitäjä.
+Sovelluksessa näkyy tietyn alueen ravintolat, joista voi etsiä tietoa ja lukea arvioita.
 
-- Käyttäjä voi kirjautua sisään ja ulos sekä luoda uuden tunnuksen.
-- Käyttäjä näkee ravintolat kartalla ja voi painaa ravintolasta, jolloin siitä näytetään lisää tietoa (kuten kuvaus ja aukioloajat).
-- Käyttäjä voi antaa arvion (tähdet ja kommentti) ravintolasta ja lukea muiden antamia arvioita.
-- Ylläpitäjä voi lisätä ja poistaa ravintoloita sekä määrittää ravintolasta näytettävät tiedot.
-- Käyttäjä voi etsiä kaikki ravintolat, joiden kuvauksessa on annettu sana.
-- Käyttäjä näkee myös listan, jossa ravintolat on järjestetty parhaimmasta huonoimpaan arvioiden mukaisesti.
-- Ylläpitäjä voi tarvittaessa poistaa käyttäjän antaman arvion.
-- Ylläpitäjä voi luoda ryhmiä, joihin ravintoloita voi luokitella. Ravintola voi kuulua yhteen tai useampaan ryhmään.
+Tiivistetysti ominaisuuksista: pääkäyttäjä pystyy luomaan ravintolan, määrittelemään sille 
+kuvauksen, aukioloajat, kategoriat, sijainnin kartalta ja poistamaan ravintolan, sekä arvioita. Peruskäyttäjä pystyy taas
+kirjoittamaan näihin ravintoloihin arvioita, kommentein ja tähtiarviolla, sekä lukemaan muiden kirjoittamia arvioita. Sovelluksessa ravintolat
+esitetään kartalla, jossa linkin ravintolaan löytää painamalla ravintolan kuvaketta kartalla. Ravintolat ovat myös listattuna arvioiden mukaiseen
+järjestykseen, sekä niitä voi hakea kategorioiden ja hakutoiminnon avulla.
 
-Sovelluksen toiminta olisi siis pitkälti esimerkkikuvauksen mukainen.
 
 ## Testaaminen
+
+>[!NOTE]
+> Sovelluksen testaaminen vaatii toimiakseen, että asennettuna on PostgreSQL ja Python. Ohjeet Linux/MacOS–järjestelmälle.
 
 Kloonaa repositorio koneellesi, määritä projektihakemiston juureen 
 tiedosto nimeltä `.env`ja määritä sille ympäristömuuttujat `SECRET_KEY=<salainen avain tähän>`
@@ -37,13 +36,7 @@ ei vaadi uuden käyttäjän luomista, vaan kyseisen käyttäjän toiminnallisuuk
 luomalla itselleen käyttäjätunnuksen, mutta on suositeltavaa luoda ensin ravintoloita ja lisätä tietoja
 pääkäyttäjän oikeuksilla, jonka jälkeen pystyy tarkastelemaan näitä peruskäyttäjän näkökulmasta.
 
-Tiivistetysti ominaisuuksista: pääkäyttäjä pystyy luomaan ravintolan, määrittelemään sille 
-kuvauksen, aukioloajat, kategoriat, sijainnin kartalta ja poistamaan ravintolan, sekä arvioita. Peruskäyttäjä pystyy taas
-kirjoittamaan näihin ravintoloihin arvioita, kommentein ja tähtiarviolla, sekä lukemaan muiden kirjoittamia arvioita. Sovelluksessa ravintolat
-esitetään kartalla, jossa linkin ravintolaan löytää painamalla ravintolan kuvaketta kartalla. Ravintolat ovat myös listattuna arvioiden mukaiseen
-järjestykseen, sekä niitä voi hakea kategorioiden ja hakutoiminnon avulla.
 
-Sovelluksen tämän hetkisessä tilassa ominaisuudet ovat siis kuvauksen mukaiset.
 
 ## Kuvat
 <img alt="sovelluskuva1" src="https://github.com/mpajuka/restaurants/assets/56785774/d1210177-ddd6-456f-b023-305308504e4e">
