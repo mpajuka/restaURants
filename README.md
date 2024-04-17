@@ -1,4 +1,7 @@
-# Ravintolat
+<div align="center">
+  <h1><img src="pin-map-fill.svg" height="25"> Ravintolat</h1>  
+</div>
+
 
 Sovelluksessa näkyy tietyn alueen ravintolat, joista voi etsiä tietoa ja lukea arvioita.
 
@@ -10,6 +13,12 @@ järjestykseen, sekä niitä voi hakea kategorioiden ja hakutoiminnon avulla.
 
 
 ## Testaaminen
+
+Sovellus on tällä hetkellä saatavilla osoitteessa: https://restaurants-or6x.onrender.com
+
+#
+
+### Paikallisesti
 
 >[!NOTE]
 > Sovelluksen testaaminen vaatii toimiakseen, että asennettuna on PostgreSQL ja Python. Ohjeet Linux/MacOS–järjestelmälle.
