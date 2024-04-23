@@ -1,7 +1,11 @@
 <div align="center">
-  <h1><img src="pin-map-fill.svg" height="25"> Ravintolat</h1>  
+  <h1><img src="pin-map-fill.svg" height="25"> Ravintolat</h1> 
+
+  <img alt="sovelluskuva1" src="https://github.com/mpajuka/restaurants/assets/56785774/d1210177-ddd6-456f-b023-305308504e4e" width="85%" >
+
 </div>
 
+#
 
 Sovelluksessa näkyy tietyn alueen ravintolat, joista voi etsiä tietoa ja lukea arvioita.
 
@@ -44,10 +48,3 @@ ei vaadi uuden käyttäjän luomista, vaan kyseisen käyttäjän toiminnallisuuk
 `käyttäjätunnus: admin, salasana: password`. Peruskäyttäjän ominaisuuksia on mahdollista testata myös heti aluksi
 luomalla itselleen käyttäjätunnuksen, mutta on suositeltavaa luoda ensin ravintoloita ja lisätä tietoja
 pääkäyttäjän oikeuksilla, jonka jälkeen pystyy tarkastelemaan näitä peruskäyttäjän näkökulmasta.
-
-
-
-## Kuvat
-<img alt="sovelluskuva1" src="https://github.com/mpajuka/restaurants/assets/56785774/d1210177-ddd6-456f-b023-305308504e4e">
-
-<img alt="sovelluskuva2" src="https://github.com/mpajuka/restaurants/assets/56785774/e8250e54-5e4e-4e29-8413-eea548cac69f">
