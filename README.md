@@ -18,12 +18,6 @@ järjestykseen, sekä niitä voi hakea kategorioiden ja hakutoiminnon avulla.
 
 ## Testaaminen
 
-Sovellus on tällä hetkellä saatavilla osoitteessa: https://restaurants-or6x.onrender.com
-
-#
-
-### Paikallisesti
-
 >[!NOTE]
 > Sovelluksen testaaminen vaatii toimiakseen, että asennettuna on PostgreSQL ja Python. Ohjeet Linux/MacOS–järjestelmälle.
 
